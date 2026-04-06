@@ -1,3 +1,10 @@
+import java.util.Properties
+
+val secrets = Properties().apply {
+    val f = rootProject.file("secret.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -12,6 +19,15 @@ android {
     }
 
     defaultConfig {
+        val tmdbToken = secrets.getProperty("TMDB_BEARER_TOKEN")
+            ?: throw GradleException("Missing TMDB_BEARER_TOKEN in secrets.properties")
+
+        buildConfigField(
+            "String",
+            "TMDB_BEARER_TOKEN",
+            "\"$tmdbToken\""
+        )
+
         applicationId = "com.example.tmdbapp"
         minSdk = 24
         targetSdk = 36
@@ -30,11 +46,14 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -49,10 +68,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(platform("androidx.compose:compose-bom:2026.03.00"))
-
-    implementation("androidx.navigation:navigation-compose:2.9.7") // Nav routers
-    implementation("com.squareup.retrofit2:retrofit:2.11.0") // HTTP lib
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.androidx.compose.foundation)

@@ -1,7 +1,10 @@
 package com.example.tmdbapp.api
 
+import com.example.tmdbapp.dataclasses.CreditsResponse
+import com.example.tmdbapp.dataclasses.MovieDetailsResponse
 import com.example.tmdbapp.dataclasses.TopRatedMoviesResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TmdbApi {
@@ -10,4 +13,16 @@ interface TmdbApi {
         @Query("language") language: String = "en-US",
         @Query("page") page: Int = 1
     ): TopRatedMoviesResponse
+
+    @GET("3/movie/{movie_id}")
+    suspend fun getMovieDetails(
+        @Path("movie_id") movieId: Int,
+        @Query("language") language: String = "en-US"
+    ): MovieDetailsResponse
+
+    @GET("3/movie/{movie_id}/credits")
+    suspend fun getCredits(
+        @Path("movie_id") movieId: Int,
+        @Query("language") language: String = "en-US"
+    ): CreditsResponse
 }

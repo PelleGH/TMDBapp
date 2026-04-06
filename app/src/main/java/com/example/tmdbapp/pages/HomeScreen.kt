@@ -1,14 +1,12 @@
 package com.example.tmdbapp.pages
 
-import android.graphics.Paint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +19,6 @@ import com.example.tmdbapp.ui.theme.TMDBappTheme
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,18 +48,20 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel = viewModel()) {
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        MovieGrid(vm.movies)
+        MovieGrid(vm.movies, navController)
     }
 
 }
 
 @Composable
-fun MovieGrid(movies: List<Movie>) {
+fun MovieGrid(movies: List<Movie>, navController: NavController) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3)
     ) {
         items(movies) { movie ->
-            MoviePoster(movie)
+            MoviePoster(movie) {
+                navController.navigate("${Routes.DETAILS}/${movie.id}")
+            }
         }
     }
 }
@@ -77,11 +76,12 @@ val sampleMovies = listOf(
 )
 
 @Composable
-fun MoviePoster(movie: Movie) {
+fun MoviePoster(movie: Movie, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .background(Color(0xFF14181C))
-            .padding(4.dp),
+            .padding(4.dp)
+            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
