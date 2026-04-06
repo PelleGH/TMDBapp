@@ -27,7 +27,7 @@ fun Navigation() {
         }
 
         composable(Routes.REVIEWS) {
-            Reviews(navController)
+            Reviews()
         }
     }
 }

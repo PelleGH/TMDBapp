@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -39,6 +38,15 @@ import com.example.tmdbapp.api.DetailsViewModel
 import com.example.tmdbapp.dataclasses.Cast
 import com.example.tmdbapp.dataclasses.MovieDetailsResponse
 import com.example.tmdbapp.ui.theme.TMDBappTheme
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun MovieDetails(
@@ -170,25 +178,70 @@ fun DetailsContent(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Runtime: ${movie.runtime} min • Rating: ${"%.1f".format(movie.vote_average)}",
+                        text = "Runtime: ${movie.runtime} min",
                         color = Color.LightGray,
                         fontSize = 14.sp
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Column {
+                        Text(
+                            text = "${String.format("%.1f", movie.vote_average)} / 10",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${movie.vote_count} ratings",
+                            color = Color(0xFFB8C0C8),
+                            fontSize = 13.sp
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
+                Column() {
+                    if (movie.poster_path != null) {
+                        AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w342${movie.poster_path}",
+                            contentDescription = movie.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .height(180.dp)
+                                .aspectRatio(2f / 3f)
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    }
+                    val context = LocalContext.current
 
-                if (movie.poster_path != null) {
-                    AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w342${movie.poster_path}",
-                        contentDescription = movie.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .height(180.dp)
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
+                    if (movie.imdb_id != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .clickable {
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://www.imdb.com/title/${movie.imdb_id}")
+                                    )
+                                    context.startActivity(intent)
+                                },
+                            color = Color(0xFFF5C518),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "IMDb",
+                                color = Color.Black,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
                 }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -202,31 +255,31 @@ fun DetailsContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = "Credits",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (directors.isNotEmpty()) {
-                Text(
-                    text = "Director",
-                    color = Color(0xFF90CEA1),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    text = directors.joinToString(),
-                    color = Color(0xFFB8C0C8),
-                    fontSize = 15.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
+//            Text(
+//                text = "Credits",
+//                color = Color.White,
+//                fontSize = 18.sp,
+//                fontWeight = FontWeight.Bold
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            if (directors.isNotEmpty()) {
+//                Text(
+//                    text = "Director",
+//                    color = Color(0xFF90CEA1),
+//                    fontSize = 13.sp,
+//                    fontWeight = FontWeight.SemiBold
+//                )
+//
+//                Text(
+//                    text = directors.joinToString(),
+//                    color = Color(0xFFB8C0C8),
+//                    fontSize = 15.sp
+//                )
+//            }
+//
+//            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Cast",
@@ -290,7 +343,9 @@ fun Dscreen() {
                 poster_path = null,
                 release_date = "2026-05-100",
                 runtime = 120,
-                vote_average = 8.2
+                vote_average = 8.2,
+                vote_count = 1,
+                imdb_id = null,
             ),
             directors = dir,
             cast = cast

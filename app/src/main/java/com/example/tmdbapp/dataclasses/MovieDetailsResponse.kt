@@ -9,4 +9,6 @@ data class MovieDetailsResponse(
     val release_date: String,
     val runtime: Int,
     val vote_average: Double,
+    val vote_count: Int,
+    val imdb_id: String?,
 )
