@@ -22,10 +22,19 @@ fun Navigation() {
             arguments = listOf(navArgument("movieId") { type = NavType.IntType })
         ) { backStackEntry ->
             val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-            MovieDetails(movieId, { navController.popBackStack() }
+            MovieDetails(
+                movieId = movieId,
+                onBackClick = { navController.popBackStack() },
+                onReviewsClick = { navController.navigate(Routes.REVIEWS) }
             )
         }
-
+        composable(
+            route = "${Routes.CATEGORY}/{categoryName}",
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName").orEmpty()
+            CategoryMoviesScreen(categoryName = categoryName, navController = navController)
+        }
         composable(Routes.REVIEWS) {
             Reviews()
         }
@@ -36,4 +45,5 @@ object Routes {
     const val HOME = "home"
     const val DETAILS = "details"
     const val REVIEWS = "reviews"
+    const val CATEGORY = "category"
 }

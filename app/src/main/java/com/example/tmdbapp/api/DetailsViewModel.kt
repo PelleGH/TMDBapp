@@ -14,15 +14,22 @@ class DetailsViewModel : ViewModel() {
 
     var movie by mutableStateOf<MovieDetailsResponse?>(null)
         private set
+
     var directors by mutableStateOf<List<String>>(emptyList())
         private set
+
     var cast by mutableStateOf<List<Cast>>(emptyList())
         private set
+
+    var trailerKey by mutableStateOf<String?>(null)
+        private set
+
     fun loadMovie(movieId: Int) {
         viewModelScope.launch {
             try {
                 val details = api.getMovieDetails(movieId)
                 val credits = api.getCredits(movieId)
+                val videos = api.getMovieVideos(movieId)
 
                 movie = details
 
@@ -31,6 +38,12 @@ class DetailsViewModel : ViewModel() {
                     .map { it.name }
 
                 cast = credits.cast
+
+                trailerKey = videos.results
+                    .firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
+                    ?.key
+                    ?: videos.results.firstOrNull { it.site == "YouTube" }
+                        ?.key
 
             } catch (e: Exception) {
                 e.printStackTrace()

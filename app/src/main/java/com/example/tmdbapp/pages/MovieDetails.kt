@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,17 +40,22 @@ import com.example.tmdbapp.ui.theme.TMDBappTheme
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import android.view.ViewGroup
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 
 @Composable
 fun MovieDetails(
     movieId: Int,
     onBackClick: () -> Unit,
+    onReviewsClick: () -> Unit,
     vm: DetailsViewModel = viewModel()
 ) {
     LaunchedEffect(movieId) {
@@ -61,6 +65,7 @@ fun MovieDetails(
     val movie = vm.movie
     val directors = vm.directors
     val cast = vm.cast
+    val trailerKey = vm.trailerKey
 
     Box(
         modifier = Modifier
@@ -82,7 +87,9 @@ fun MovieDetails(
             DetailsContent(
                 movie = movie,
                 directors = directors,
-                cast = cast
+                cast = cast,
+                trailerKey,
+                onReviewsClick = onReviewsClick
             )
 
             TopBar(onBackClick)
@@ -125,7 +132,9 @@ fun BackdropSection(movie: MovieDetailsResponse) {
 fun DetailsContent(
     movie: MovieDetailsResponse,
     directors: List<String>,
-    cast: List<Cast>
+    cast: List<Cast>,
+    trailerKey: String?,
+    onReviewsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -255,6 +264,23 @@ fun DetailsContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            if (trailerKey != null) {
+                Text(
+                    text = "Trailer",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                EmbeddedVideoPlayer(
+                    videoUrl = "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
 //            Text(
 //                text = "Credits",
 //                color = Color.White,
@@ -300,9 +326,21 @@ fun DetailsContent(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "View Reviews",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clickable { onReviewsClick() }  // 👈 CALL IT
+                    .padding(16.dp)
+            )
+                }
+
         }
     }
-}
+
 @Composable
 fun TopBar(onBackClick: () -> Unit) {
     Row(
@@ -320,7 +358,42 @@ fun TopBar(onBackClick: () -> Unit) {
         }
     }
 }
+@Composable
+fun EmbeddedVideoPlayer(videoUrl: String) {
+    val context = LocalContext.current
 
+    val exoPlayer = remember(videoUrl) {
+        ExoPlayer.Builder(context).build().apply { // build instance
+            val mediaItem = MediaItem.fromUri(Uri.parse(videoUrl)) // grab video
+            setMediaItem(mediaItem) // set it
+            prepare() // buffer
+            playWhenReady = false
+        }
+    }
+
+    DisposableEffect(Unit) { // destroy player to free up space and memory
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    AndroidView( // displays the video from the exoplayer
+        factory = {
+            PlayerView(context).apply {
+                player = exoPlayer // assign the exoplayer engine to ui player
+                useController = true // show pause/play
+                layoutParams = ViewGroup.LayoutParams( // size translation from view to compose
+                    ViewGroup.LayoutParams.MATCH_PARENT, // take same width/height as parent container (fillmaxwidth and 220.dp)
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .clip(RoundedCornerShape(12.dp))
+    )
+}
 @Preview
 @Composable
 fun Dscreen() {
@@ -348,7 +421,9 @@ fun Dscreen() {
                 imdb_id = null,
             ),
             directors = dir,
-            cast = cast
+            cast = cast,
+            trailerKey = "key",
+            onReviewsClick = {}
         )
     }
 }
