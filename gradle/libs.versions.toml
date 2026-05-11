@@ -13,6 +13,8 @@ navigationCompose = "2.9.7"
 navigationComposeVersion = "2.7.7"
 navigationRuntimeKtx = "2.9.7"
 foundation = "1.10.6"
+room3CommonJvm = "3.0.0-alpha03"
+room3Runtime = "3.0.0-alpha03"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,8 +36,11 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-room3-common-jvm = { group = "androidx.room", name = "room3-common-jvm", version.ref = "room3CommonJvm" }
+androidx-room3-runtime = { group = "androidx.room", name = "room3-runtime", version.ref = "room3Runtime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

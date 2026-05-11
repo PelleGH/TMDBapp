@@ -6,10 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tmdbapp.dataclasses.Movie
-import kotlinx.coroutines.async
+import com.example.tmdbapp.db.MovieRepository
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val repository: MovieRepository
+) : ViewModel() {
+
     var topRatedMovies by mutableStateOf<List<Movie>>(emptyList())
         private set
 
@@ -20,18 +23,37 @@ class HomeViewModel : ViewModel() {
         private set
 
     init {
-        loadMovies()
+        observeCache()
+        refreshMovies()
     }
 
-    private fun loadMovies() {
+    private fun observeCache() {
         viewModelScope.launch {
-            val topRatedDeferred = async { TmdbClient.api.getTopRatedMovies() } // loads all three at the same time
-            val trendingDeferred = async { TmdbClient.api.getTrendingMovies() }
-            val popularDeferred = async { TmdbClient.api.getPopularMovies() }
+            repository.getMoviesFromCache(MovieCategory.TOP_RATED).collect {
+                topRatedMovies = it
+            }
+        }
 
-            topRatedMovies = topRatedDeferred.await().results.take(15)
-            trendingMovies = trendingDeferred.await().results.take(15)
-            popularMovies = popularDeferred.await().results.take(15)
+        viewModelScope.launch {
+            repository.getMoviesFromCache(MovieCategory.TRENDING).collect {
+                trendingMovies = it
+            }
+        }
+
+        viewModelScope.launch {
+            repository.getMoviesFromCache(MovieCategory.POPULAR).collect {
+                popularMovies = it
+            }
+        }
+    }
+
+    private fun refreshMovies() {
+        viewModelScope.launch {
+            try {
+                repository.refreshAllCategories()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

@@ -8,9 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.tmdbapp.api.TmdbClient.api
 import com.example.tmdbapp.dataclasses.Cast
 import com.example.tmdbapp.dataclasses.MovieDetailsResponse
+import com.example.tmdbapp.db.MovieRepository
 import kotlinx.coroutines.launch
 
-class DetailsViewModel : ViewModel() {
+class DetailsViewModel(
+    private val repository: MovieRepository
+) : ViewModel() {
 
     var movie by mutableStateOf<MovieDetailsResponse?>(null)
         private set
@@ -27,22 +30,32 @@ class DetailsViewModel : ViewModel() {
     fun loadMovie(movieId: Int) {
         viewModelScope.launch {
             try {
-                val details = api.getMovieDetails(movieId)
-                val credits = api.getCredits(movieId)
-                val videos = api.getMovieVideos(movieId)
+                movie = repository.getMovieDetails(movieId)
 
-                movie = details
+                val credits = try {
+                    api.getCredits(movieId)
+                } catch (e: Exception) {
+                    null
+                }
 
-                directors = credits.crew
-                    .filter { it.job == "Director" }
-                    .map { it.name }
+                val videos = try {
+                    api.getMovieVideos(movieId)
+                } catch (e: Exception) {
+                    null
+                }
 
-                cast = credits.cast
+                directors = credits?.crew
+                    ?.filter { it.job == "Director" }
+                    ?.map { it.name }
+                    ?: emptyList()
 
-                trailerKey = videos.results
-                    .firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
+                cast = credits?.cast ?: emptyList()
+
+                trailerKey = videos?.results
+                    ?.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
                     ?.key
-                    ?: videos.results.firstOrNull { it.site == "YouTube" }
+                    ?: videos?.results
+                        ?.firstOrNull { it.site == "YouTube" }
                         ?.key
 
             } catch (e: Exception) {
