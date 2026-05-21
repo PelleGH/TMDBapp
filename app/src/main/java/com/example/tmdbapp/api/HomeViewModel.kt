@@ -11,7 +11,6 @@ import com.example.tmdbapp.db.MovieDatabase
 import com.example.tmdbapp.db.toEntity
 import com.example.tmdbapp.db.toMovie
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
 import androidx.work.Constraints

@@ -44,13 +44,6 @@ import com.example.tmdbapp.api.HomeViewModel
 import com.example.tmdbapp.api.MovieCategory
 import com.example.tmdbapp.dataclasses.Movie
 import com.example.tmdbapp.ui.theme.TMDBappTheme
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.ConnectivityManager
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalContext
 @Composable
 fun HomeScreen(navController: NavController, vm: HomeViewModel = viewModel()) {
     Column(
